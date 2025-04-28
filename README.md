@@ -42,30 +42,16 @@ npm test
 ```
 src/
   ├── index.ts                # Main application entry point
-  ├── server.ts               # Server configuration and setup
-  ├── middleware/             # Express middleware
-  │   ├── validate.ts         # Request validation
-  │   └── error-handler.ts    # Global error handling
-  └── tools/                  # MCP tools organized by category
-      ├── math.ts             # Math calculation tools
-      └── text.ts             # Text manipulation tools
+  └── server.ts               # MCP server definition with resource, tool, and prompt
 ```
 
-## Available Tools
+## Available Functionality
 
-### Math Tools
+This server implements a simple echo endpoint with three MCP components:
 
-- `add`: Add two numbers
-- `subtract`: Subtract one number from another
-- `multiply`: Multiply two numbers
-- `divide`: Divide one number by another
-
-### Text Tools
-
-- `uppercase`: Convert text to uppercase
-- `lowercase`: Convert text to lowercase
-- `reverse`: Reverse the characters in a string
-- `wordCount`: Count the number of words in a text
+- **Resource**: `echo://{message}` - Returns the message as a resource
+- **Tool**: `echo` - Echoes the provided message back as a tool response
+- **Prompt**: `echo` - Creates a user prompt with the provided message
 
 ## MCP Protocol
 
@@ -75,26 +61,53 @@ This server implements the [Model Context Protocol](https://modelcontextprotocol
 
 Send a POST request to `/mcp` with a JSON-RPC payload:
 
+
+#### Initialize
+
 ```bash
 curl -X POST http://localhost:3001/mcp \
   -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Accept: text/event-stream" \
   -d '{
     "jsonrpc": "2.0",
-    "method": "callTool",
+    "id": 1,
+    "method": "initialize",
     "params": {
-      "name": "add",
+      "protocolVersion": "2024-11-05",
+      "capabilities": {
+        "roots": {
+          "listChanged": true
+        },
+        "sampling": {}
+      },
+      "clientInfo": {
+        "name": "ExampleClient",
+        "version": "1.0.0"
+      }
+    }
+  }'
+```
+
+#### Call Echo Tool
+
+```bash
+curl -X POST http://localhost:3001/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Accept: text/event-stream" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "echo",
       "arguments": {
-        "a": 5,
-        "b": 7
+        "message": "Hello, World!"
       }
     },
     "id": 1
   }'
 ```
-
-## Adding New Tools
-
-To add new tools, create a new file in the `src/tools` directory following the pattern in the existing files, then register your module in `src/server.ts`.
 
 ## License
 
