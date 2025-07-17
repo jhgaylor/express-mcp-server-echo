@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/jhgaylor-express-mcp-server-echo-badge.png)](https://mseep.ai/app/jhgaylor-express-mcp-server-echo)
+
 # Express MCP Server
 
 A stateless Model Context Protocol (MCP) server built with Express and TypeScript.
