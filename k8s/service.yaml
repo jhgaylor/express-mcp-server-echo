@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mcp-echo
+  namespace: mcp-echo
+  labels:
+    app: mcp-echo
+spec:
+  type: ClusterIP
+  selector:
+    app: mcp-echo
+  ports:
+    - port: 80
+      targetPort: 3000

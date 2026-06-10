@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mcp-echo
+  namespace: mcp-echo
+  labels:
+    app: mcp-echo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mcp-echo
+  template:
+    metadata:
+      labels:
+        app: mcp-echo
+    spec:
+      containers:
+        - name: mcp-echo
+          # `:latest` is mutable — the build workflow rebuilds on every
+          # push to main. imagePullPolicy: Always forces a manifest check
+          # on pod start so `kubectl rollout restart` picks up the new
+          # digest.
+          image: ghcr.io/jhgaylor/express-mcp-server-echo:latest
+          imagePullPolicy: Always
+          env:
+            # The code defaults to 3001 but the Dockerfile EXPOSEs 3000 —
+            # pin it explicitly so the Service targetPort can't drift.
+            - name: PORT
+              value: "3000"
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+            # The server only routes POST /mcp (a GET returns 404), so a
+            # TCP check is the honest liveness signal here.
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 25m
+              memory: 64Mi
+            limits:
+              memory: 128Mi

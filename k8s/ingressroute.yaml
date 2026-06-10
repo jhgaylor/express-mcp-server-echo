@@ -1,0 +1,40 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: mcp-echo
+  namespace: mcp-echo
+  labels:
+    app: mcp-echo
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    - match: "Host(`echo.inevitable.fyi`)"
+      kind: Rule
+      services:
+        - name: mcp-echo
+          port: 80
+  tls:
+    secretName: mcp-echo-tls
+---
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: mcp-echo-http
+  namespace: mcp-echo
+  labels:
+    app: mcp-echo
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: "Host(`echo.inevitable.fyi`)"
+      kind: Rule
+      middlewares:
+        # redirect-https lives in the default namespace; cross-namespace
+        # refs need the namespace qualifier.
+        - name: redirect-https
+          namespace: default
+      services:
+        - name: mcp-echo
+          port: 80
